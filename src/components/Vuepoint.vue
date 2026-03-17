@@ -498,7 +498,7 @@ onBeforeUnmount(() => {
         :style="hoveredAnnotationPreviewStyle"
       >
         <div class="vuepoint__draft-preview-card">
-          <p class="vuepoint__draft-label">{{ hoveredAnnotation.element }}</p>
+          <p class="vuepoint__draft-label">{{ hoveredAnnotation.displayLabel ?? hoveredAnnotation.element }}</p>
           <p class="vuepoint__draft-preview-comment">{{ hoveredAnnotation.comment }}</p>
         </div>
       </div>

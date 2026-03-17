@@ -2,6 +2,7 @@ import {
   getAccessibilitySummary,
   captureElementSnapshot,
   getElementLabel,
+  getHoverLabel,
   getElementPath,
   getNearbyText,
   getVueComponentName,
@@ -31,6 +32,7 @@ export function createAnnotationTarget({
 }: CreateAnnotationTargetInput): VuepointAnnotationTarget {
   return {
     element: getElementLabel(element),
+    displayLabel: getHoverLabel(element),
     elementPath: getElementPath(element),
     componentName: getVueComponentName(element, source),
     nearbyText: getNearbyText(element),
@@ -57,6 +59,7 @@ export function createAnnotation({
       annotationTargets.length === 1
         ? primaryTarget.element
         : `${annotationTargets.length} elements selected`,
+    displayLabel: annotationTargets.length === 1 ? primaryTarget.displayLabel : undefined,
     elementPath: primaryTarget.elementPath,
     componentName: primaryTarget.componentName,
     pageUrl: window.location.href,

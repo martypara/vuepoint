@@ -26,6 +26,7 @@ export interface VuepointElementSnapshot {
 
 export interface VuepointAnnotationTarget {
   element: string;
+  displayLabel?: string;
   elementPath: string;
   componentName?: string;
   nearbyText?: string;
@@ -38,6 +39,7 @@ export interface VuepointAnnotation {
   id: string;
   comment: string;
   element: string;
+  displayLabel?: string;
   elementPath: string;
   componentName?: string;
   pageUrl: string;
