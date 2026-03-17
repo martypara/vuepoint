@@ -36,10 +36,6 @@ import "vuepoint/style.css";
 
 For a plain Vue app, replace `<NuxtPage />` with your root app content.
 
-When you render `<Vuepoint />` directly, configure it with component props such as `enabled`, `storageKey`, `accentColor`, `zIndex`, `copyDepth`, `clearOnCopy`, and `cursor`.
-
-If you prefer the auto-mounted plugin style instead of rendering the component directly, Vuepoint also supports plugin installation. The component-based setup is the simplest and clearest integration.
-
 ### Vite config for Vue
 
 ```ts
