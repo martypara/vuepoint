@@ -1,0 +1,788 @@
+.vuepoint {
+  --vuepoint-accent: #42b883;
+  --vuepoint-accent-hover: color-mix(in srgb, var(--vuepoint-accent) 88%, white);
+  --vuepoint-accent-border: color-mix(in srgb, var(--vuepoint-accent) 78%, black);
+  --vuepoint-accent-soft: color-mix(in srgb, var(--vuepoint-accent) 16%, transparent);
+  --vuepoint-accent-soft-border: color-mix(in srgb, var(--vuepoint-accent) 34%, transparent);
+  --vuepoint-accent-text: color-mix(in srgb, var(--vuepoint-accent) 72%, white);
+  --vuepoint-accent-shadow: color-mix(in srgb, var(--vuepoint-accent) 28%, transparent);
+  --vuepoint-zinc-950: #111111;
+  --vuepoint-zinc-800: #27272a;
+  --vuepoint-zinc-700: #3f3f46;
+  --vuepoint-zinc-500: #71717a;
+  --vuepoint-zinc-400: #a1a1aa;
+  --vuepoint-zinc-200: #e4e4e7;
+  --vuepoint-zinc-100: #f4f4f5;
+  --vuepoint-z: 2147483000;
+  --vuepoint-z-overlay: var(--vuepoint-z);
+  --vuepoint-z-ui: calc(var(--vuepoint-z) + 2);
+  cursor: default;
+  position: relative;
+  z-index: var(--vuepoint-z);
+  font-size: 14px;
+  line-height: 1.4;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[data-vuepoint-no-select=""],
+html[data-vuepoint-no-select=""] body,
+body[data-vuepoint-no-select=""] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html[data-vuepoint-force-cursor=""],
+html[data-vuepoint-force-cursor=""] body,
+html[data-vuepoint-force-cursor=""] body :not([data-vuepoint-ui], [data-vuepoint-ui] *) {
+  cursor: var(--vuepoint-page-cursor, crosshair) !important;
+}
+
+.vuepoint__dock,
+.vuepoint__launcher,
+.vuepoint__panel {
+  position: fixed;
+  z-index: var(--vuepoint-z-ui);
+}
+
+.vuepoint__hover,
+.vuepoint__marker,
+.vuepoint__draft {
+  position: fixed;
+  z-index: var(--vuepoint-z-overlay);
+}
+
+.vuepoint__dock {
+  right: 20px;
+  bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vuepoint__launcher {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  transition: opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vuepoint__launcher.is-hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+.vuepoint__button,
+.vuepoint__action,
+.vuepoint__marker,
+.vuepoint__icon-action {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  transition: transform 120ms ease, opacity 120ms ease, background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease, color 120ms ease;
+  will-change: transform;
+}
+
+.vuepoint__button:focus,
+.vuepoint__action:focus,
+.vuepoint__marker:focus,
+.vuepoint__icon-action:focus,
+.vuepoint__button:focus-visible,
+.vuepoint__action:focus-visible,
+.vuepoint__marker:focus-visible,
+.vuepoint__icon-action:focus-visible {
+  outline: none;
+}
+
+.vuepoint__button:active,
+.vuepoint__action:active,
+.vuepoint__marker:active,
+.vuepoint__icon-action:active {
+  transform: scale(0.97);
+}
+
+.vuepoint__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--vuepoint-accent);
+  background: var(--vuepoint-accent);
+  color: #ffffff;
+  padding: 0;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 20px var(--vuepoint-accent-shadow);
+  animation: vuepoint-pop-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint__button:hover {
+  background: var(--vuepoint-accent-hover);
+  border-color: var(--vuepoint-accent-hover);
+  color: #ffffff;
+}
+
+.vuepoint__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 5px;
+  height: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--vuepoint-accent-border);
+  background: var(--vuepoint-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.vuepoint__panel {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid #27272a;
+  background: #121214;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transform-origin: right bottom;
+  will-change: transform, opacity;
+}
+
+.vuepoint-panel-enter-active {
+  animation: vuepoint-pop-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint-panel-leave-active {
+  animation: vuepoint-pop-in 100ms ease-out reverse both;
+}
+
+.vuepoint__toolbar-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vuepoint__settings-row {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vuepoint__panel-divider {
+  align-self: stretch;
+  height: 1px;
+  background-color: #27272a;
+  margin: 1px 0;
+}
+
+.vuepoint__toolbar-group {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vuepoint__toolbar-btn {
+  appearance: none;
+  font: inherit;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+}
+
+.vuepoint__toolbar-btn:focus,
+.vuepoint__toolbar-btn:focus-visible {
+  outline: none;
+}
+
+.vuepoint__toolbar-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.vuepoint__toolbar-btn.is-pressed:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.vuepoint__toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.vuepoint__toolbar-btn.is-active {
+  background-color: var(--vuepoint-accent-soft);
+  color: var(--vuepoint-accent-text);
+  box-shadow: inset 0 0 0 1px var(--vuepoint-accent-soft-border);
+}
+
+.vuepoint__toolbar-btn--primary {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  margin: 0 0px;
+  background-color: transparent;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+.vuepoint__toolbar-btn--primary:not(.is-active):hover {
+  background-color: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__toolbar-btn--icon {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  margin: 0 0px;
+  background-color: transparent;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+.vuepoint__toolbar-btn--icon:not(.is-active):hover {
+  background-color: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__toolbar-btn-icon-only {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.vuepoint__copy-icon-wrapper {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vuepoint__copy-icon-wrapper .icon-copy {
+  transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: absolute;
+}
+
+.vuepoint__copy-icon-wrapper .icon-check {
+  transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.vuepoint__toolbar-btn.is-copied .icon-copy {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.vuepoint__toolbar-btn.is-copied .icon-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vuepoint__toolbar-btn--text {
+  padding: 4px 8px;
+  color: #a1a1aa;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.vuepoint__toolbar-btn--text:not(.is-active):hover {
+  background-color: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background-color: #27272a;
+  margin: 0 2px;
+}
+
+.vuepoint__tooltip {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 4px 8px;
+  background-color: #27272a;
+  color: #fafafa;
+  font-size: 11px;
+  border-radius: 4px;
+  border: 1px solid #3f3f46;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+}
+
+.vuepoint__tooltip-shortcut {
+  color: var(--vuepoint-accent-text);
+  font-weight: 600;
+}
+
+.vuepoint__toolbar-group:hover .vuepoint__tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.vuepoint__info-group {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: #71717a;
+  cursor: help;
+}
+
+.vuepoint__info-group:hover {
+  color: #a1a1aa;
+}
+
+.vuepoint__info-group .vuepoint__tooltip {
+  top: 50%;
+  left: auto;
+  right: calc(100% + 8px);
+  transform: translateY(-50%) translateX(4px);
+  white-space: normal;
+  max-width: 170px;
+  width: max-content;
+  text-align: center;
+}
+
+.vuepoint__info-group:hover .vuepoint__tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.vuepoint__info-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.vuepoint__setting-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.vuepoint__setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #a1a1aa;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.vuepoint__setting-item:hover {
+  background-color: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__setting-item--inline {
+  padding: 0 8px;
+  margin: 0;
+  gap: 16px;
+  height: 32px;
+  white-space: nowrap;
+  animation: vuepoint-pop-in 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint__switch {
+  appearance: none;
+  border: none;
+  background: #27272a;
+  width: 28px;
+  height: 16px;
+  border-radius: 16px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 0;
+  margin: 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.vuepoint__switch:focus,
+.vuepoint__switch:focus-visible {
+  outline: none;
+}
+
+.vuepoint__switch.is-active {
+  background: var(--vuepoint-accent);
+  box-shadow: none;
+}
+
+.vuepoint__switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.vuepoint__switch.is-active .vuepoint__switch-thumb {
+  transform: translateX(12px);
+}
+
+
+.vuepoint__hover {
+  pointer-events: none;
+  border: 2px dashed var(--vuepoint-accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--vuepoint-accent) 14%, transparent);
+  will-change: transform, opacity;
+  animation: vuepoint-fade-in 120ms ease-out both;
+}
+
+.vuepoint__hover-label {
+  pointer-events: none;
+  border-radius: 8px;
+  background: var(--vuepoint-zinc-800);
+  color: var(--vuepoint-zinc-100);
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--vuepoint-zinc-700);
+  white-space: nowrap;
+}
+
+.vuepoint__marker {
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--vuepoint-accent);
+  color: #fff;
+  font-size: 12px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  will-change: transform, opacity;
+}
+
+.vuepoint__marker:active {
+  transform: translate(-50%, -50%) scale(0.97);
+}
+
+.vuepoint-marker-enter-active {
+  animation: vuepoint-marker-in 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint-marker-leave-active {
+  animation: vuepoint-marker-out 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint__marker-icon {
+  width: 12px;
+  height: 12px;
+  display: block;
+  pointer-events: none;
+}
+
+.vuepoint__draft {
+  transform: translateX(-50%);
+}
+
+.vuepoint__draft--bottom {
+  transform: translate(-50%, 14px);
+}
+
+.vuepoint__draft--top {
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.vuepoint__draft-card {
+  box-sizing: border-box;
+  width: 280px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #27272a;
+  background: #121214;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transform-origin: top center;
+  will-change: transform, opacity;
+  animation: vuepoint-draft-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.vuepoint__draft-shake--a {
+  animation: vuepoint-draft-shake 220ms ease-out;
+}
+
+.vuepoint__draft-shake--b {
+  animation: vuepoint-draft-shake 220ms ease-out;
+}
+
+.vuepoint__draft--top .vuepoint__draft-card {
+  transform-origin: bottom center;
+}
+
+.vuepoint__draft-preview-card {
+  box-sizing: border-box;
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #27272a;
+  background: #121214;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.vuepoint__draft-preview-comment {
+  margin: 0;
+  color: #f4f4f5;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.vuepoint__draft-label {
+  margin: 0 0 8px;
+  color: #a1a1aa;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vuepoint__draft-quote {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #1e1e21;
+  border: 1px solid #27272a;
+  line-height: 1.45;
+  color: #a1a1aa;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.vuepoint__textarea {
+  width: 100%;
+  border: 1px solid #27272a;
+  border-radius: 6px;
+  background: #1e1e21;
+  color: #fafafa;
+  padding: 10px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-size: 13px;
+  cursor: text;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.vuepoint__textarea:focus {
+  border-color: var(--vuepoint-accent);
+  box-shadow: 0 0 0 1px var(--vuepoint-accent);
+}
+
+.vuepoint__textarea::placeholder {
+  color: #71717a;
+}
+
+.vuepoint__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.vuepoint__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  background: var(--vuepoint-accent);
+  color: white;
+}
+
+.vuepoint__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.vuepoint__action:not(:disabled):hover {
+  background: var(--vuepoint-accent-hover);
+}
+
+.vuepoint__action--ghost {
+  background: transparent;
+  color: #a1a1aa;
+}
+
+.vuepoint__action--ghost:not(:disabled):hover {
+  background: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: transparent;
+  color: #a1a1aa;
+  transition: all 0.15s ease;
+}
+
+.vuepoint__icon-action:hover {
+  background: #333333;
+  color: #fafafa;
+}
+
+.vuepoint__action-delete {
+  margin-right: auto;
+}
+
+.vuepoint__button-icon,
+.vuepoint__icon {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.vuepoint__button-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+@keyframes vuepoint-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes vuepoint-draft-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes vuepoint-draft-shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(5px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes vuepoint-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vuepoint-marker-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes vuepoint-marker-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+}

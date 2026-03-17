@@ -1,0 +1,98 @@
+**vuepoint** is a visual feedback overlay for Vue 3 and Nuxt. Click any element, attach a note, and get a source-aware markdown report your coding agent directly act on.
+
+![screenshot](assets/screenshot.png)
+
+## Install
+
+```bash
+npm install vuepoint -D
+```
+
+## Usage
+
+Vuepoint setup has two parts:
+
+1. render `<Vuepoint />` near the root of your app
+2. add the `vuepoint()` Vite plugin so source locations can be captured down to the exact line of code
+
+### Root component setup
+
+Render `Vuepoint` once in your top-level app component.
+
+- Vue: put it in your root app component
+- Nuxt: put it in `app.vue`
+
+```vue
+<script setup lang="ts">
+import { Vuepoint } from "vuepoint";
+import "vuepoint/style.css";
+</script>
+
+<template>
+  <NuxtPage />
+  <Vuepoint :enabled="import.meta.dev" />
+</template>
+```
+
+For a plain Vue app, replace `<NuxtPage />` with your root app content.
+
+When you render `<Vuepoint />` directly, configure it with component props such as `enabled`, `storageKey`, `accentColor`, `zIndex`, `copyDepth`, `clearOnCopy`, and `cursor`.
+
+If you prefer the auto-mounted plugin style instead of rendering the component directly, Vuepoint also supports plugin installation. The component-based setup is the simplest and clearest integration.
+
+### Vite config for Vue
+
+```ts
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import { vuepoint } from "vuepoint/vite";
+
+export default defineConfig({
+  plugins: [vue(), vuepoint()],
+});
+```
+
+### Vite config for Nuxt
+
+```ts
+import { vuepoint } from "vuepoint/vite";
+
+export default defineNuxtConfig({
+  vite: {
+    plugins: [vuepoint()],
+  },
+});
+```
+
+
+## Shortcuts
+
+- `Cmd+Shift+V`: toggle the overlay
+- `Shift+Click`: select multiple elements to annotate
+- `Enter`: save an annotation
+- `Shift+Enter`:  add a newline in an annotation
+- `C`: copy all annotations to clipboard
+- `X`: clear all annotations 
+- `F`: freeze all animations and site interactions
+- `Esc`: close the annotation draft, close the overlay on second press
+
+## Source capture
+
+Vuepoint adds a `data-vuepoint-loc` attribute to Vue template elements during local development. That is how it maps a selected DOM node back to a relative source path like `src/components/Button.vue:18:7`.
+
+Without the Vite plugin, Vuepoint can still annotate elements visually, but exact source capture will be unavailable.
+
+## Persistence
+
+Annotations are stored in `localStorage` under the configured `storageKey` as a JSON array of annotations.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## License
+
+MIT
