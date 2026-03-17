@@ -6,6 +6,19 @@ import { parse } from "@vue/compiler-sfc";
 const VUE_FILE_RE = /\.vue$/;
 const PLUGIN_META = '<meta name="vuepoint-vite-plugin" content="true">';
 
+interface TransformResult {
+  code: string;
+  map: null;
+}
+
+export interface VuepointVitePlugin {
+  name: "vuepoint:vite";
+  apply: "serve";
+  enforce: "pre";
+  transform: (code: string, id: string) => TransformResult | null;
+  transformIndexHtml: (html: string) => string;
+}
+
 interface SourceLocationNode {
   type: number;
   loc: {
@@ -73,12 +86,12 @@ function applyInsertions(source: string, insertions: Insertion[]): string {
   return output;
 }
 
-export function vuepoint(): Plugin {
-  return {
+export function vuepoint(): VuepointVitePlugin {
+  const plugin = {
     name: "vuepoint:vite",
     apply: "serve",
     enforce: "pre",
-    transform(code, id) {
+    transform: (code: string, id: string) => {
       if (!VUE_FILE_RE.test(id)) return null;
       if (id.includes("?")) return null;
       if (id.includes("/node_modules/")) return null;
@@ -96,11 +109,13 @@ export function vuepoint(): Plugin {
         map: null,
       };
     },
-    transformIndexHtml(html) {
+    transformIndexHtml: (html: string) => {
       if (html.includes(PLUGIN_META)) return html;
       return html.replace(/<head([^>]*)>/i, `<head$1>\n    ${PLUGIN_META}`);
     },
-  };
+  } satisfies Plugin & VuepointVitePlugin;
+
+  return plugin;
 }
 
 export default vuepoint;

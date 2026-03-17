@@ -1,7 +1,7 @@
 {
   "name": "vuepoint",
   "version": "0.0.1",
-  "description": "Dev-only visual feedback overlay for Vue and Nuxt apps.",
+  "description": "Visual feedback overlay for Vue and Nuxt apps.",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -37,8 +37,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "test": "npm run test:unit",
-    "test:unit": "vue-tsc --noEmit && vite build --config vite.testing.config.ts && node --test tests/**/*.test.mjs",
+    "test": "npm run test:unit && npm run test:package",
+    "test:package": "npm run build && node --test tests/package-types.test.mjs",
+    "test:unit": "vue-tsc --noEmit && vite build --config vite.testing.config.ts && node --test tests/copy-depth.test.mjs tests/storage.test.mjs tests/vite.test.mjs",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview"
   },
