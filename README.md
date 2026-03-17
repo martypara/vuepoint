@@ -36,7 +36,7 @@ import "vuepoint/style.css";
 
 For a plain Vue app, replace `<NuxtPage />` with your root app content.
 
-### Vite config for Vue
+### Vue: vite.config.ts
 
 ```ts
 import { defineConfig } from "vite";
@@ -48,7 +48,7 @@ export default defineConfig({
 });
 ```
 
-### Vite config for Nuxt
+### Nuxt: nuxt.config.ts
 
 ```ts
 import { vuepoint } from "vuepoint/vite";
