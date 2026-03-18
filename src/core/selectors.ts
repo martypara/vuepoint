@@ -1,5 +1,6 @@
 import type { VuepointAnnotationTarget } from "../types";
-import { getElementLabel } from "./labels";
+import { getElementLabel, getNearbyText } from "./labels";
+import { captureElementSnapshot } from "./snapshot";
 
 export function getElementSelectorSegment(
   element: HTMLElement,
@@ -55,11 +56,50 @@ export function resolveAnnotationTargetElement(target: VuepointAnnotationTarget)
     document.querySelectorAll<HTMLElement>(`[data-vuepoint-loc="${CSS.escape(target.source.raw)}"]`),
   );
 
-  const matchingPath = candidates.find((element) => getElementPath(element) === target.elementPath);
-  if (matchingPath) return matchingPath;
+  if (candidates.length <= 1) {
+    return candidates[0] ?? null;
+  }
 
-  const matchingLabel = candidates.find((element) => getElementLabel(element) === target.element);
-  if (matchingLabel) return matchingLabel;
+  const scoredCandidates = candidates.map((element) => {
+    let score = 0;
 
-  return candidates[0] ?? null;
+    if (getElementLabel(element) === target.element) {
+      score += 5;
+    }
+
+    if (target.nearbyText && getNearbyText(element) === target.nearbyText) {
+      score += 4;
+    }
+
+    if (getElementPath(element) === target.elementPath) {
+      score += 2;
+    }
+
+    const snapshot = target.snapshot ? captureElementSnapshot(element) : null;
+    if (snapshot && target.snapshot) {
+      if (snapshot.text === target.snapshot.text) {
+        score += 3;
+      }
+
+      if (snapshot.classes.join(" ") === target.snapshot.classes.join(" ")) {
+        score += 1;
+      }
+    }
+
+    const rectDistance = snapshot && target.snapshot
+      ? Math.abs(snapshot.rect.x - target.snapshot.rect.x) + Math.abs(snapshot.rect.y - target.snapshot.rect.y)
+      : Number.POSITIVE_INFINITY;
+
+    return { element, score, rectDistance };
+  });
+
+  scoredCandidates.sort((left, right) => {
+    if (right.score !== left.score) {
+      return right.score - left.score;
+    }
+
+    return left.rectDistance - right.rectDistance;
+  });
+
+  return scoredCandidates[0]?.element ?? null;
 }
