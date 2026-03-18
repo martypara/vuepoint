@@ -5,7 +5,8 @@
 ## Install
 
 ```bash
-npm install vuepoint
+npm install vuepoint -D
+pnpm add -D vuepoint
 ```
 
 ## Usage
