@@ -3,23 +3,11 @@ import { getElementLabel } from "./labels";
 
 export function getElementSelectorSegment(
   element: HTMLElement,
-  options: { includeScopeAttributes?: boolean } = {},
+  _options: { includeScopeAttributes?: boolean } = {},
 ): string {
   const tag = element.tagName.toLowerCase();
   const id = element.id ? `#${element.id}` : "";
-  const classes = Array.from(element.classList)
-    .filter(Boolean)
-    .map((className) => `.${className}`)
-    .join("");
-  const scopeAttributes = options.includeScopeAttributes
-    ? element
-        .getAttributeNames()
-        .filter((name) => name.startsWith("data-v-"))
-        .map((name) => `[${name}]`)
-        .join("")
-    : "";
-
-  return `${tag}${id}${classes}${scopeAttributes}`;
+  return `${tag}${id}`;
 }
 
 export function getElementPath(element: HTMLElement, maxDepth = 5): string {
@@ -31,9 +19,7 @@ export function getElementPath(element: HTMLElement, maxDepth = 5): string {
     const tag = current.tagName.toLowerCase();
     if (tag === "html" || tag === "body") break;
 
-    parts.unshift(
-      getElementSelectorSegment(current, { includeScopeAttributes: depth === 0 }),
-    );
+    parts.unshift(getElementSelectorSegment(current));
     current = current.parentElement;
     depth += 1;
   }

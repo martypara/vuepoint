@@ -1,6 +1,4 @@
 import type { VuepointSourceContext } from "../types";
-import { getElementSelectorSegment } from "./selectors";
-
 interface VuepointDomElement extends HTMLElement {
   __vueParentComponent?: {
     type?: {
@@ -22,10 +20,7 @@ function clipText(value: string, maxLength: number): string {
 
 function getSimpleElementLabel(element: HTMLElement): string {
   const tag = element.tagName.toLowerCase();
-  if (element.id) return `#${element.id}`;
-
-  const firstClass = Array.from(element.classList).find(Boolean);
-  if (firstClass) return `${tag}.${firstClass}`;
+  if (element.id) return `${tag}#${element.id}`;
 
   return tag;
 }
@@ -102,16 +97,16 @@ export function getVueComponentName(
 }
 
 export function getElementLabel(element: HTMLElement): string {
-  const selector = getElementSelectorSegment(element, { includeScopeAttributes: true });
   const text = sanitizeText(element.textContent ?? "");
   const ariaLabel = sanitizeText(element.getAttribute("aria-label") ?? "");
   const labelText = text || ariaLabel;
+  const baseLabel = getSimpleElementLabel(element);
 
   if (labelText) {
-    return `${selector} "${clipText(labelText, 22)}"`;
+    return `${baseLabel} "${clipText(labelText, 22)}"`;
   }
 
-  return selector;
+  return baseLabel;
 }
 
 export function getHoverLabel(element: HTMLElement): string {

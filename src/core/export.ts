@@ -1,6 +1,14 @@
 import type { VuepointAnnotation, VuepointCopyDepth } from "../types";
 import { isDetailedCopyDepth } from "./copyDepth";
 
+function formatClasses(classes: string[]): string | null {
+  if (classes.length === 0) return null;
+  if (classes.length <= 5) return classes.join(", ");
+
+  const shown = classes.slice(0, 5).join(", ");
+  return `${shown} [${classes.length - 5} more]`;
+}
+
 function appendEnvironment(
   lines: string[],
   pageUrl: string,
@@ -50,6 +58,11 @@ function appendTargetDetails(
   }
 
   lines.push(`DOM Path: ${target.elementPath}`);
+
+  const classes = target.snapshot ? formatClasses(target.snapshot.classes) : null;
+  if (classes) {
+    lines.push(`Classes: ${classes}`);
+  }
 
   if (target.nearbyText) {
     lines.push(`Context: ${target.nearbyText}`);
