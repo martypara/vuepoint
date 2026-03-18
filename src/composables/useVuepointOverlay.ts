@@ -48,6 +48,7 @@ const DRAFT_ESTIMATED_HEIGHT = 260;
 const FORCE_CURSOR_ATTR = "data-vuepoint-force-cursor";
 
 export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>) {
+  let listenersAttached = false;
   const active = ref(false);
   const draftOpen = ref(false);
   const draftComment = ref("");
@@ -78,6 +79,35 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
 
   function persistAnnotations() {
     writeStoredAnnotations(options.value.storageKey, annotations.value);
+  }
+
+  function attachListeners() {
+    if (listenersAttached) return;
+
+    scrollY.value = window.scrollY;
+    readAnnotations();
+    document.addEventListener("mousemove", handleMouseMove, true);
+    document.addEventListener("click", handleClick, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+    document.addEventListener("keyup", handleKeyUp, true);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    listenersAttached = true;
+  }
+
+  function detachListeners() {
+    if (!listenersAttached) return;
+
+    setActive(false);
+    disableMotionPause();
+    disableInteractionBlock();
+    applyPageCursor(null);
+    applyTextSelectionSuppression(false);
+    document.removeEventListener("mousemove", handleMouseMove, true);
+    document.removeEventListener("click", handleClick, true);
+    document.removeEventListener("keydown", handleKeyDown, true);
+    document.removeEventListener("keyup", handleKeyUp, true);
+    window.removeEventListener("scroll", handleScroll);
+    listenersAttached = false;
   }
 
   function resetHoverState() {
@@ -516,26 +546,29 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     applyTextSelectionSuppression(nextValue);
   });
 
+  watch(
+    () => options.value.enabled,
+    (nextValue) => {
+      if (typeof window === "undefined" || typeof document === "undefined") return;
+
+      if (nextValue) {
+        attachListeners();
+        return;
+      }
+
+      detachListeners();
+    },
+    { immediate: true },
+  );
+
   onMounted(() => {
-    scrollY.value = window.scrollY;
-    readAnnotations();
-    document.addEventListener("mousemove", handleMouseMove, true);
-    document.addEventListener("click", handleClick, true);
-    document.addEventListener("keydown", handleKeyDown, true);
-    document.addEventListener("keyup", handleKeyUp, true);
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    if (options.value.enabled) {
+      attachListeners();
+    }
   });
 
   onBeforeUnmount(() => {
-    disableMotionPause();
-    disableInteractionBlock();
-    applyPageCursor(null);
-    applyTextSelectionSuppression(false);
-    document.removeEventListener("mousemove", handleMouseMove, true);
-    document.removeEventListener("click", handleClick, true);
-    document.removeEventListener("keydown", handleKeyDown, true);
-    document.removeEventListener("keyup", handleKeyUp, true);
-    window.removeEventListener("scroll", handleScroll);
+    detachListeners();
   });
 
   return {

@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-npm install vuepoint -D
+npm install vuepoint
 ```
 
 ## Usage
@@ -30,11 +30,13 @@ import "vuepoint/style.css";
 
 <template>
   <NuxtPage />
-  <Vuepoint :enabled="import.meta.dev" />
+  <Vuepoint />
 </template>
 ```
 
 For a plain Vue app, replace `<NuxtPage />` with your root app content.
+
+Vuepoint only runs in development. In production builds it renders nothing and attaches no listeners.
 
 ### Vue: vite.config.ts
 

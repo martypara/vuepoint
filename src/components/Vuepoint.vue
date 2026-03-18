@@ -15,6 +15,7 @@ import {
   isDetailedCopyDepth as isDetailedCopyDepthValue,
   normalizeCopyDepth,
 } from "../core/copyDepth";
+import { resolveVuepointEnabled } from "../core/enabled";
 import { VUEPOINT_OPTIONS_KEY, defaultVuepointOptions } from "../plugin";
 import type { VuepointRuntimeOptions } from "../types";
 
@@ -38,6 +39,7 @@ const options = computed<VuepointRuntimeOptions>(() => ({
   ...Object.fromEntries(
     Object.entries(props).filter(([, value]) => value !== undefined),
   ),
+  enabled: resolveVuepointEnabled(props.enabled ?? injectedOptions.enabled),
   copyDepth: normalizeCopyDepth(props.copyDepth ?? injectedOptions.copyDepth),
 }) as VuepointRuntimeOptions);
 

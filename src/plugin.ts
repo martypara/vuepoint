@@ -2,13 +2,14 @@ import type { App, InjectionKey } from "vue";
 import { createVNode, render } from "vue";
 import Vuepoint from "./components/Vuepoint.vue";
 import { normalizeCopyDepth } from "./core/copyDepth";
+import { resolveVuepointEnabled } from "./core/enabled";
 import type { VuepointInstallOptions, VuepointRuntimeOptions } from "./types";
 
 export const VUEPOINT_OPTIONS_KEY: InjectionKey<VuepointRuntimeOptions> =
   Symbol("vuepoint-options");
 
 export const defaultVuepointOptions: VuepointRuntimeOptions = {
-  enabled: true,
+  enabled: resolveVuepointEnabled(undefined),
   autoMount: true,
   componentName: "Vuepoint",
   storageKey: "__vuepoint_annotations__",
@@ -25,6 +26,7 @@ function normalizeOptions(
   return {
     ...defaultVuepointOptions,
     ...options,
+    enabled: resolveVuepointEnabled(options.enabled),
     copyDepth: normalizeCopyDepth(options.copyDepth),
   };
 }
