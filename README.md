@@ -6,6 +6,9 @@
 
 ```bash
 npm install vuepoint -D
+```
+
+```bash
 pnpm add -D vuepoint
 ```
 
