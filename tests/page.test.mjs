@@ -9,31 +9,31 @@ test("getCurrentPageKey uses origin and pathname only", () => {
   const previousWindow = globalThis.window;
   globalThis.window = {
     location: {
-      origin: "http://localhost:3000",
-      pathname: "/projekte/50027",
-      search: "?tab=arbeiten",
-      hash: "#details",
+      origin: "https://app.example.test",
+      pathname: "/projects/alpha",
+      search: "?view=summary",
+      hash: "#section",
     },
   };
 
-  assert.equal(getCurrentPageKey(), "http://localhost:3000/projekte/50027");
+  assert.equal(getCurrentPageKey(), "https://app.example.test/projects/alpha");
 
   globalThis.window = previousWindow;
 });
 
 test("normalizeAnnotationPageKey falls back to pageUrl origin and pathname", () => {
   assert.equal(
-    normalizeAnnotationPageKey("http://localhost:3000/projekte/50027?tab=arbeiten#details"),
-    "http://localhost:3000/projekte/50027",
+    normalizeAnnotationPageKey("https://app.example.test/projects/alpha?view=summary#section"),
+    "https://app.example.test/projects/alpha",
   );
 });
 
 test("normalizeAnnotationPageKey prefers an explicit stored page key", () => {
   assert.equal(
     normalizeAnnotationPageKey(
-      "http://localhost:3000/projekte/50027?tab=arbeiten#details",
-      "http://localhost:3000/projekte/50027",
+      "https://app.example.test/projects/alpha?view=summary#section",
+      "https://app.example.test/projects/alpha",
     ),
-    "http://localhost:3000/projekte/50027",
+    "https://app.example.test/projects/alpha",
   );
 });
