@@ -9,6 +9,26 @@ interface VuepointDomElement extends HTMLElement {
   };
 }
 
+const IGNORED_COMPONENT_NAMES = new Set([
+  "Transition",
+  "TransitionGroup",
+  "KeepAlive",
+  "Teleport",
+  "Suspense",
+  "RouterLink",
+  "NuxtLink",
+  "ClientOnly",
+  "NuxtPage",
+  "NuxtLayout",
+  "NuxtIsland",
+  "Primitive",
+  "Slot",
+  "FocusScope",
+  "Presence",
+  "Anonymous",
+  "Component",
+]);
+
 function sanitizeText(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
@@ -82,18 +102,25 @@ export function getVueComponentName(
   source?: VuepointSourceContext,
 ): string | undefined {
   let current: HTMLElement | null = element;
+  let fallbackName: string | undefined;
 
   while (current) {
     const instance = (current as VuepointDomElement).__vueParentComponent;
     const type = instance?.type;
-    const name = type?.name || type?.__name || type?.displayName;
+    const name = (type?.name || type?.__name || type?.displayName)?.trim();
     if (name) {
-      return `<${name}>`;
+      if (!fallbackName) {
+        fallbackName = `<${name}>`;
+      }
+
+      if (!IGNORED_COMPONENT_NAMES.has(name)) {
+        return `<${name}>`;
+      }
     }
     current = current.parentElement;
   }
 
-  return getComponentNameFromSource(source);
+  return getComponentNameFromSource(source) ?? fallbackName;
 }
 
 export function getElementLabel(element: HTMLElement): string {
