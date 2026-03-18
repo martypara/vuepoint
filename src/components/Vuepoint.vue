@@ -53,16 +53,8 @@ let pressedToolbarButtonTimer: number | null = null;
 const copied = ref(false);
 let copiedTimer: number | null = null;
 const settingsOpen = ref(false);
-const portalTarget = ref<string | HTMLElement>("body");
 const HOVER_LABEL_VIEWPORT_INSET = 10;
 const HOVER_LABEL_CURSOR_GAP = 12;
-const OPEN_DIALOG_SELECTOR = [
-  "[role='dialog'][data-state='open']",
-  "[role='alertdialog'][data-state='open']",
-  "[aria-modal='true'][data-state='open']",
-].join(", ");
-let portalTargetObserver: MutationObserver | null = null;
-let portalTargetFrame: number | null = null;
 
 const isDetailedCopyDepth = computed(
   () => isDetailedCopyDepthValue(copyDepth.value),
@@ -70,6 +62,7 @@ const isDetailedCopyDepth = computed(
 
 const {
   active,
+  allAnnotationCount,
   annotations,
   canSubmitDraft,
   clearOnCopy,
@@ -90,7 +83,8 @@ const {
   hoverLabel,
   hoverRect,
   isEditing,
-  pageFrozen,
+  getAnnotationNumber,
+  pageUnfrozen,
   selectedHighlights,
   addAnnotation,
   clearAnnotations,
@@ -291,46 +285,7 @@ function handleDraftTextareaKeydown(event: KeyboardEvent) {
   addAnnotation();
 }
 
-function resolvePortalTarget() {
-  if (typeof document === "undefined") {
-    portalTarget.value = "body";
-    return;
-  }
-
-  const openDialogs = Array.from(
-    document.querySelectorAll<HTMLElement>(OPEN_DIALOG_SELECTOR),
-  ).filter((element) => element.isConnected);
-
-  portalTarget.value = openDialogs.at(-1) ?? "body";
-}
-
-function schedulePortalTargetUpdate() {
-  if (portalTargetFrame !== null) {
-    window.cancelAnimationFrame(portalTargetFrame);
-  }
-
-  portalTargetFrame = window.requestAnimationFrame(() => {
-    resolvePortalTarget();
-    portalTargetFrame = null;
-  });
-}
-
 onMounted(() => {
-  resolvePortalTarget();
-
-  if (typeof document !== "undefined") {
-    portalTargetObserver = new MutationObserver(() => {
-      schedulePortalTargetUpdate();
-    });
-
-    portalTargetObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["aria-modal", "data-state", "open", "role"],
-    });
-  }
-
   document.addEventListener("keydown", handleShortcutKeydown, true);
   window.addEventListener("resize", updateHoverLabelSize);
 });
@@ -345,17 +300,13 @@ onBeforeUnmount(() => {
   if (copiedTimer !== null) {
     window.clearTimeout(copiedTimer);
   }
-  if (portalTargetFrame !== null) {
-    window.cancelAnimationFrame(portalTargetFrame);
-  }
-  portalTargetObserver?.disconnect();
   document.removeEventListener("keydown", handleShortcutKeydown, true);
   window.removeEventListener("resize", updateHoverLabelSize);
 });
 </script>
 
 <template>
-  <Teleport :to="portalTarget">
+  <Teleport to="body">
     <div
       v-if="options.enabled"
       class="vuepoint"
@@ -406,7 +357,7 @@ onBeforeUnmount(() => {
                 type="button"
                 class="vuepoint__toolbar-btn vuepoint__toolbar-btn--primary"
                 :class="{ 'is-pressed': pressedToolbarButton === 'copy', 'is-copied': copied }"
-                :disabled="annotations.length === 0"
+                :disabled="allAnnotationCount === 0"
                 @click="handleCopy"
               >
                 <div class="vuepoint__copy-icon-wrapper">
@@ -424,7 +375,7 @@ onBeforeUnmount(() => {
                 type="button"
                 class="vuepoint__toolbar-btn vuepoint__toolbar-btn--icon"
                 :class="{ 'is-pressed': pressedToolbarButton === 'clear' }"
-                :disabled="annotations.length === 0"
+                :disabled="allAnnotationCount === 0"
                 @click="handleClear"
               >
                 <IconTrash class="vuepoint__toolbar-btn-icon-only" />
@@ -438,13 +389,13 @@ onBeforeUnmount(() => {
               <button
                 type="button"
                 class="vuepoint__toolbar-btn vuepoint__toolbar-btn--icon"
-                :class="{ 'is-active': pageFrozen, 'is-pressed': pressedToolbarButton === 'freeze' }"
+                :class="{ 'is-active': pageUnfrozen, 'is-pressed': pressedToolbarButton === 'freeze' }"
                 @click="handleFreeze"
               >
                 <IconLock class="vuepoint__toolbar-btn-icon-only" />
               </button>
               <div class="vuepoint__tooltip">
-                {{ pageFrozen ? "Resume page" : "Freeze page" }} <span class="vuepoint__tooltip-shortcut">F</span>
+                {{ pageUnfrozen ? "Freeze page" : "Unfreeze page" }} <span class="vuepoint__tooltip-shortcut">F</span>
               </div>
             </div>
 
@@ -487,8 +438,8 @@ onBeforeUnmount(() => {
           >
             <IconOpen class="vuepoint__button-icon" />
           </button>
-          <span v-if="annotations.length > 0" class="vuepoint__badge">
-            {{ annotations.length }}
+          <span v-if="allAnnotationCount > 0" class="vuepoint__badge">
+            {{ allAnnotationCount }}
           </span>
         </div>
       </div>
@@ -540,7 +491,7 @@ onBeforeUnmount(() => {
             v-if="hoveredAnnotationId === annotation.id"
             class="vuepoint__marker-icon"
           />
-          <span v-else>{{ index + 1 }}</span>
+          <span v-else>{{ getAnnotationNumber(annotation) }}</span>
         </button>
       </TransitionGroup>
 

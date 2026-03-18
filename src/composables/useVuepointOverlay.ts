@@ -63,7 +63,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   const annotations = ref<VuepointAnnotation[]>([]);
   const copyDepth = ref<VuepointCopyDepth>(options.value.copyDepth);
   const clearOnCopy = ref(options.value.clearOnCopy);
-  const pageFrozen = ref(false);
+  const pageUnfrozen = ref(false);
   const editingAnnotationId = ref<string | null>(null);
   const hoveredAnnotationId = ref<string | null>(null);
   const previousCursor = ref<string | null>(null);
@@ -185,29 +185,37 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     active.value = nextValue;
     hoveredAnnotationId.value = null;
 
-    if (nextValue) return;
+    if (nextValue) {
+      if (pageUnfrozen.value) {
+        disableMotionPause();
+        disableInteractionBlock();
+        return;
+      }
 
-    resetDraftState();
-    resetHoverState();
-    if (pageFrozen.value) {
-      pageFrozen.value = false;
-      disableMotionPause();
-      disableInteractionBlock();
-    }
-    textSelectionSuppressed.value = false;
-  }
-
-  function togglePageFreeze() {
-    pageFrozen.value = !pageFrozen.value;
-
-    if (pageFrozen.value) {
       enableMotionPause();
       enableInteractionBlock();
       return;
     }
 
+    resetDraftState();
+    resetHoverState();
+    pageUnfrozen.value = false;
     disableMotionPause();
     disableInteractionBlock();
+    textSelectionSuppressed.value = false;
+  }
+
+  function togglePageFreeze() {
+    pageUnfrozen.value = !pageUnfrozen.value;
+
+    if (pageUnfrozen.value) {
+      disableMotionPause();
+      disableInteractionBlock();
+      return;
+    }
+
+    enableMotionPause();
+    enableInteractionBlock();
   }
 
   function openDraftPopup() {
@@ -382,7 +390,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
 
   async function copyMarkdown() {
     const markdown = buildMarkdownExport(
-      visibleAnnotations.value,
+      annotations.value,
       window.location.href,
       `${window.innerWidth}x${window.innerHeight}`,
       copyDepth.value,
@@ -431,6 +439,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   );
 
   const copyActionLabel = computed(() => "Copy to clipboard");
+  const allAnnotationCount = computed(() => annotations.value.length);
 
   const visibleAnnotations = computed(() => {
     const pageKey = currentPageKey.value;
@@ -535,6 +544,11 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     hoveredAnnotationId.value = annotationId;
   }
 
+  function getAnnotationNumber(annotation: VuepointAnnotation): number {
+    const index = annotations.value.findIndex((entry) => entry.id === annotation.id);
+    return index >= 0 ? index + 1 : 0;
+  }
+
   watch(
     () => options.value.copyDepth,
     (nextValue) => {
@@ -606,6 +620,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
 
   return {
     active,
+    allAnnotationCount,
     annotations: visibleAnnotations,
     canSubmitDraft,
     clearOnCopy,
@@ -626,7 +641,8 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     hoverLabel,
     hoverRect,
     isEditing,
-    pageFrozen,
+    getAnnotationNumber,
+    pageUnfrozen,
     selectedHighlights,
     addAnnotation,
     clearAnnotations,
