@@ -535,7 +535,8 @@ onBeforeUnmount(() => {
                 Cancel
               </button>
               <button type="button" class="vuepoint__action" :disabled="!canSubmitDraft" @click="addAnnotation">
-                {{ isEditing ? "Update" : "Save" }}
+                <span class="vuepoint__action-label">{{ isEditing ? "Update" : "Save" }}</span>
+                <span aria-hidden="true">⏎</span>
               </button>
             </div>
           </div>
