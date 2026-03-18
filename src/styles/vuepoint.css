@@ -614,6 +614,7 @@ html[data-vuepoint-force-cursor=""] body :not([data-vuepoint-ui], [data-vuepoint
   box-sizing: border-box;
   font-size: 13px;
   cursor: text;
+  caret-color: #fafafa;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }

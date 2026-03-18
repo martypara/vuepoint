@@ -111,10 +111,6 @@ watch(draftOpen, async (nextValue) => {
     }
     return;
   }
-
-  await nextTick();
-  textareaRef.value?.focus();
-  textareaRef.value?.select();
 });
 
 watch(blockedDraftClickCount, async (nextValue) => {
@@ -517,6 +513,7 @@ onBeforeUnmount(() => {
               v-model="draftComment"
               class="vuepoint__textarea"
               rows="3"
+              autofocus
               placeholder="Your instructions"
               spellcheck="false"
               autocomplete="off"
