@@ -380,10 +380,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   }
 
   function clearAnnotations() {
-    const pageKey = currentPageKey.value;
-    annotations.value = annotations.value.filter((entry) =>
-      normalizeAnnotationPageKey(entry.pageUrl, entry.pageKey) !== pageKey
-    );
+    annotations.value = [];
     persistAnnotations();
     resetDraftState();
   }
