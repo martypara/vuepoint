@@ -12,8 +12,8 @@ npm install vuepoint
 
 Vuepoint setup has two parts:
 
-1. render `<Vuepoint />` near the root of your app
-2. add the `vuepoint()` Vite plugin so source locations can be captured down to the exact line of code
+1. render `<Vuepoint />` in your root app component
+2. add the vuepoint() plugin to your Vite or Nuxt config to capture exact file, line, and column references
 
 ### Root component setup
 
