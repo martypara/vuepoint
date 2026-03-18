@@ -76,7 +76,7 @@ export default defineNuxtConfig({
 - `C`: copy all annotations to clipboard
 - `X`: clear all annotations 
 - `F`: freeze all animations and site interactions
-- `Esc`: close the annotation draft, close the overlay on second press
+- `Esc`: close the annotation draft / close vuepoint
 
 ## Source capture
 
