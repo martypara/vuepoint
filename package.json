@@ -1,6 +1,6 @@
 {
   "name": "vuepoint",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Visual feedback overlay for Vue and Nuxt apps.",
   "type": "module",
   "license": "MIT",
