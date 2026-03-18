@@ -52,9 +52,14 @@ export function getTargetElement(clientX: number, clientY: number): HTMLElement 
 }
 
 export function resolveAnnotationTargetElement(target: VuepointAnnotationTarget): HTMLElement | null {
-  const candidates = Array.from(
+  const sourceRoots = Array.from(
     document.querySelectorAll<HTMLElement>(`[data-vuepoint-loc="${CSS.escape(target.source.raw)}"]`),
   );
+
+  const candidates = Array.from(new Set(sourceRoots.flatMap((root) => {
+    const descendants = Array.from(root.querySelectorAll<HTMLElement>("*"));
+    return [root, ...descendants];
+  })));
 
   if (candidates.length <= 1) {
     return candidates[0] ?? null;

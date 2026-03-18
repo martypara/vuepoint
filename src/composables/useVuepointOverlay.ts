@@ -16,6 +16,7 @@ import {
   enableInteractionBlock,
   enableMotionPause,
 } from "../core/freeze";
+import { getCurrentPageKey, normalizeAnnotationPageKey } from "../core/page";
 import { getSourceContext } from "../core/source";
 import { readStoredAnnotations, writeStoredAnnotations } from "../core/storage";
 import type {
@@ -72,6 +73,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   const pendingShiftSelection = ref(false);
   const textSelectionSuppressed = ref(false);
   const blockedDraftClickCount = ref(0);
+  const currentPageKey = ref("");
 
   function readAnnotations() {
     annotations.value = readStoredAnnotations(options.value.storageKey);
@@ -85,6 +87,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     if (listenersAttached) return;
 
     scrollY.value = window.scrollY;
+    currentPageKey.value = getCurrentPageKey();
     readAnnotations();
     document.addEventListener("mousemove", handleMouseMove, true);
     document.addEventListener("click", handleClick, true);
@@ -108,6 +111,10 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     document.removeEventListener("keyup", handleKeyUp, true);
     window.removeEventListener("scroll", handleScroll);
     listenersAttached = false;
+  }
+
+  function syncCurrentPageKey() {
+    currentPageKey.value = getCurrentPageKey();
   }
 
   function resetHoverState() {
@@ -220,6 +227,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   }
 
   function handleMouseMove(event: MouseEvent) {
+    syncCurrentPageKey();
     if (!active.value || draftOpen.value) return;
     if (isVuepointTarget(event.target)) {
       resetHoverState();
@@ -236,6 +244,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   }
 
   function handleClick(event: MouseEvent) {
+    syncCurrentPageKey();
     if (!active.value) return;
     if (isVuepointEvent(event)) return;
 
@@ -286,6 +295,7 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   }
 
   function handleScroll() {
+    syncCurrentPageKey();
     scrollY.value = window.scrollY;
   }
 
@@ -362,14 +372,17 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   }
 
   function clearAnnotations() {
-    annotations.value = [];
+    const pageKey = currentPageKey.value;
+    annotations.value = annotations.value.filter((entry) =>
+      normalizeAnnotationPageKey(entry.pageUrl, entry.pageKey) !== pageKey
+    );
     persistAnnotations();
     resetDraftState();
   }
 
   async function copyMarkdown() {
     const markdown = buildMarkdownExport(
-      annotations.value,
+      visibleAnnotations.value,
       window.location.href,
       `${window.innerWidth}x${window.innerHeight}`,
       copyDepth.value,
@@ -419,15 +432,22 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
 
   const copyActionLabel = computed(() => "Copy to clipboard");
 
+  const visibleAnnotations = computed(() => {
+    const pageKey = currentPageKey.value;
+    return annotations.value.filter((entry) =>
+      normalizeAnnotationPageKey(entry.pageUrl, entry.pageKey) === pageKey
+    );
+  });
+
   const editingAnnotation = computed(() =>
     editingAnnotationId.value
-      ? annotations.value.find((entry) => entry.id === editingAnnotationId.value) ?? null
+      ? visibleAnnotations.value.find((entry) => entry.id === editingAnnotationId.value) ?? null
       : null,
   );
 
   const hoveredAnnotation = computed(() =>
     hoveredAnnotationId.value
-      ? annotations.value.find((entry) => entry.id === hoveredAnnotationId.value) ?? null
+      ? visibleAnnotations.value.find((entry) => entry.id === hoveredAnnotationId.value) ?? null
       : null,
   );
 
@@ -546,6 +566,16 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
     applyTextSelectionSuppression(nextValue);
   });
 
+  watch(currentPageKey, () => {
+    hoveredAnnotationId.value = null;
+    if (editingAnnotationId.value) {
+      const stillVisible = visibleAnnotations.value.some((entry) => entry.id === editingAnnotationId.value);
+      if (!stillVisible) {
+        resetDraftState();
+      }
+    }
+  });
+
   watch(
     () => options.value.enabled,
     (nextValue) => {
@@ -562,18 +592,21 @@ export function useVuepointOverlay(options: ComputedRef<VuepointRuntimeOptions>)
   );
 
   onMounted(() => {
+    syncCurrentPageKey();
     if (options.value.enabled) {
       attachListeners();
     }
+    window.addEventListener("popstate", syncCurrentPageKey);
   });
 
   onBeforeUnmount(() => {
+    window.removeEventListener("popstate", syncCurrentPageKey);
     detachListeners();
   });
 
   return {
     active,
-    annotations,
+    annotations: visibleAnnotations,
     canSubmitDraft,
     clearOnCopy,
     copyActionLabel,

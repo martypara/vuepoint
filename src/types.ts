@@ -43,6 +43,7 @@ export interface VuepointAnnotation {
   elementPath: string;
   componentName?: string;
   pageUrl: string;
+  pageKey?: string;
   viewport: string;
   timestamp: number;
   xPercent: number;

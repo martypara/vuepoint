@@ -7,6 +7,7 @@ import {
   getNearbyText,
   getVueComponentName,
 } from "./dom";
+import { getCurrentPageKey } from "./page";
 import type {
   VuepointAnnotation,
   VuepointAnnotationTarget,
@@ -63,6 +64,7 @@ export function createAnnotation({
     elementPath: primaryTarget.elementPath,
     componentName: primaryTarget.componentName,
     pageUrl: window.location.href,
+    pageKey: getCurrentPageKey(),
     viewport: `${window.innerWidth}x${window.innerHeight}`,
     timestamp: Date.now(),
     xPercent,

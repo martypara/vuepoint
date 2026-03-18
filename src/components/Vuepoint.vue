@@ -53,8 +53,16 @@ let pressedToolbarButtonTimer: number | null = null;
 const copied = ref(false);
 let copiedTimer: number | null = null;
 const settingsOpen = ref(false);
+const portalTarget = ref<string | HTMLElement>("body");
 const HOVER_LABEL_VIEWPORT_INSET = 10;
 const HOVER_LABEL_CURSOR_GAP = 12;
+const OPEN_DIALOG_SELECTOR = [
+  "[role='dialog'][data-state='open']",
+  "[role='alertdialog'][data-state='open']",
+  "[aria-modal='true'][data-state='open']",
+].join(", ");
+let portalTargetObserver: MutationObserver | null = null;
+let portalTargetFrame: number | null = null;
 
 const isDetailedCopyDepth = computed(
   () => isDetailedCopyDepthValue(copyDepth.value),
@@ -283,7 +291,46 @@ function handleDraftTextareaKeydown(event: KeyboardEvent) {
   addAnnotation();
 }
 
+function resolvePortalTarget() {
+  if (typeof document === "undefined") {
+    portalTarget.value = "body";
+    return;
+  }
+
+  const openDialogs = Array.from(
+    document.querySelectorAll<HTMLElement>(OPEN_DIALOG_SELECTOR),
+  ).filter((element) => element.isConnected);
+
+  portalTarget.value = openDialogs.at(-1) ?? "body";
+}
+
+function schedulePortalTargetUpdate() {
+  if (portalTargetFrame !== null) {
+    window.cancelAnimationFrame(portalTargetFrame);
+  }
+
+  portalTargetFrame = window.requestAnimationFrame(() => {
+    resolvePortalTarget();
+    portalTargetFrame = null;
+  });
+}
+
 onMounted(() => {
+  resolvePortalTarget();
+
+  if (typeof document !== "undefined") {
+    portalTargetObserver = new MutationObserver(() => {
+      schedulePortalTargetUpdate();
+    });
+
+    portalTargetObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["aria-modal", "data-state", "open", "role"],
+    });
+  }
+
   document.addEventListener("keydown", handleShortcutKeydown, true);
   window.addEventListener("resize", updateHoverLabelSize);
 });
@@ -298,13 +345,17 @@ onBeforeUnmount(() => {
   if (copiedTimer !== null) {
     window.clearTimeout(copiedTimer);
   }
+  if (portalTargetFrame !== null) {
+    window.cancelAnimationFrame(portalTargetFrame);
+  }
+  portalTargetObserver?.disconnect();
   document.removeEventListener("keydown", handleShortcutKeydown, true);
   window.removeEventListener("resize", updateHoverLabelSize);
 });
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport :to="portalTarget">
     <div
       v-if="options.enabled"
       class="vuepoint"
